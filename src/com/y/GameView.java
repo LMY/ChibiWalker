@@ -69,7 +69,7 @@ public class GameView extends SurfaceView
 			bmps[i] = BitmapFactory.decodeResource(resources, res_indexes[i]);
 		
 		// create sprites
-		final int INITIAL_SPRITES = 0;
+		final int INITIAL_SPRITES = 10;
 		
 		Sprite chibi = new Sprite(this, bmps[0], Sprite.Action.IDLE);
 		chibi.x = 0;
