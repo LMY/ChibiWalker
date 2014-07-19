@@ -20,4 +20,9 @@ public class Randomizer
 	{
 	    return min + rand.nextInt(max - min + 1);
 	}
+	
+	public double randDouble()
+	{
+	    return rand.nextDouble();
+	}
 }

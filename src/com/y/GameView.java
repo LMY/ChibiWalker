@@ -1,6 +1,9 @@
 package com.y;
 
 import com.y.chibiwalker.R;
+import com.y.dungeon.Dungeon;
+import com.y.dungeon.Sprite;
+
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.Resources;
@@ -69,18 +72,7 @@ public class GameView extends SurfaceView
 			bmps[i] = BitmapFactory.decodeResource(resources, res_indexes[i]);
 		
 		// create sprites
-		final int INITIAL_SPRITES = 10;
-		
 		Sprite chibi = new Sprite(this, bmps[0], Sprite.Action.IDLE);
-		chibi.x = 0;
-		chibi.y = 0;
-
-		for (int i=0; i<INITIAL_SPRITES; i++)
-		{
-			int rnd = Randomizer.instance.randInt(1, bmps.length-1);
-			dungeon.addSprite(new Sprite(this, bmps[rnd]));
-		}
-		
 		Bitmap dungeonwall = BitmapFactory.decodeResource(resources, R.drawable.wall);
 		
 		int width = getWidth();
@@ -104,12 +96,18 @@ public class GameView extends SurfaceView
           if (lastClick < 0 || System.currentTimeMillis() - lastClick > 200) {
                  lastClick = System.currentTimeMillis();
                  synchronized (getHolder()) {
-                	 if (dungeon.isScreenEmpty((int) event.getX(), (int) event.getY()))
-                		 dungeon.RequestPlayerGo(event.getX(), event.getY());
+               		 dungeon.onTouchEvent(event.getX(), event.getY());
                  }
           }
 
           return true;
+    }
+    
+    @Override
+    public boolean performClick()
+    {
+    	super.performClick();
+        return true;
     }
 }
 
