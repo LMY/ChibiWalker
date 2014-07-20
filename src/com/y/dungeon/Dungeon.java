@@ -1,6 +1,10 @@
 package com.y.dungeon;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.y.Randomizer;
+import com.y.ui.UIButton;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -8,13 +12,7 @@ import android.graphics.Rect;
 
 public class Dungeon
 {
-	private Bitmap bmp;
-	
 	private Sprite chibi;
-	
-	public static int XDIM = 64;
-	public static int YDIM = 64;
-    private static Rect srcRect = new Rect(0, 0, XDIM, YDIM);
 	
     private Vec2 scrollVector;
     
@@ -22,43 +20,46 @@ public class Dungeon
     
     private Vec2 screensize;
     
-	public Dungeon(Sprite chibi, Bitmap bmp, int screenwidth, int screenheight)
+	public Dungeon(Sprite chibi, Bitmap bmpWall, int screenwidth, int screenheight)
 	{
 		this.chibi = chibi;
-		this.bmp = bmp;
 		
-		screensize = new Vec2(screenwidth/XDIM, screenheight/YDIM);
+		screensize = new Vec2(screenwidth/DungeonQuad.XDIM, screenheight/DungeonQuad.YDIM);
 		
 		scrollVector = new Vec2();
 		
-//		loadLevel(DEFAULT_LVL0);
-		randomLevel(100, 100);
-	}
-	
-	
-	private void loadLevel(String[] level)
-	{
-		quads = new DungeonQuad[level.length][];
+		initUIButtons();
 		
-        for (int y=0;y<level.length; y++) {
-        	quads[y] = new DungeonQuad[level[y].length()];
-
-        	for (int x=0; x<level[y].length(); x++)
-        		if (level[y].charAt(x)=='s') {
-        			chibi.setPosition(new Vec2(x, y));
-        			quads[y][x] = new DungeonQuad(true);
-//        			quads[y][x].onPlayerEnter(chibi);
-        		}
-        		else if (level[y].charAt(x)=='x') {
-        			quads[y][x] = new DungeonQuad(false);
-        		}
-        		else if (level[y].charAt(x)==' ') {
-        			quads[y][x] = new DungeonQuad(true);
-        		}
-        }
+//		loadLevel(DEFAULT_LVL0);
+		randomLevel(bmpWall, 100, 100);
 	}
+	
+	
+	private List<UIButton> uiButtons;
+	public void initUIButtons()
+	{
+		final int SPACING = 10;
+		
+		uiButtons = new ArrayList<UIButton>();
+		uiButtons.add(UIButton.buttonUp);
+		UIButton.buttonUp.setPosition(new Vec2(SPACING+DungeonQuad.XDIM*1, screensize.getY()*DungeonQuad.YDIM-SPACING-DungeonQuad.XDIM));
+		
+		uiButtons.add(UIButton.buttonDown);
+		UIButton.buttonDown.setPosition(new Vec2(SPACING+DungeonQuad.XDIM*1, screensize.getY()*DungeonQuad.YDIM-SPACING));
+		
+		uiButtons.add(UIButton.buttonLeft);
+		UIButton.buttonLeft.setPosition(new Vec2(SPACING, screensize.getY()*DungeonQuad.YDIM-SPACING));
+		
+		uiButtons.add(UIButton.buttonRight);
+		UIButton.buttonRight.setPosition(new Vec2(SPACING+DungeonQuad.XDIM*2, screensize.getY()*DungeonQuad.YDIM-SPACING));
+		
+		uiButtons.add(UIButton.buttonAttack);
+		UIButton.buttonAttack.setPosition(new Vec2(SPACING+DungeonQuad.XDIM*2+SPACING, screensize.getY()*DungeonQuad.YDIM-SPACING-DungeonQuad.XDIM-SPACING));
+	}
+	
 
-	private void randomLevel(int dx, int dy)
+
+	private void randomLevel(Bitmap bmpWall, int dx, int dy)
 	{
 		quads = new DungeonQuad[dy][];
 		
@@ -76,50 +77,24 @@ public class Dungeon
 					walkable[y][x] = (Randomizer.instance.randDouble() < 1-dist/500);
 				}
 				
-		
-//		Stack<Vec2> paths = new Stack<Vec2>();
-//		paths.add(new Vec2(2, 2));
-//		while (!paths.isEmpty()) {
-//			Vec2 ele = paths.pop();
-//			
-//		}
-		
-		
+
         for (int y=0;y<quads.length; y++) {
         	quads[y] = new DungeonQuad[dx];
 
-        	for (int x=0; x<dx; x++)
+        	for (int x=0; x<dx; x++) {
+        		final Vec2 position = new Vec2(x, y);
+        		
         		if (x == 2 && y == 2) {
         			chibi.setPosition(new Vec2(x, y));
-        			quads[y][x] = new DungeonQuad(true);
+        			quads[y][x] = new DungeonQuad(bmpWall, true, position);
 //        			quads[y][x].onPlayerEnter(chibi);
         		}
         		else
-        			quads[y][x] = new DungeonQuad(walkable[y][x]);
+        			quads[y][x] = new DungeonQuad(bmpWall, walkable[y][x], position);
+        	}
         }
 	}
 	
-
-	public final static String[] DEFAULT_LVL0 = new String[] {
-		    "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
-			"xx      xx          x   x    x",
-			"xx      xxxxx xxxx  x   xx xxx",
-			"xx        x      x  x    x   x",
-			"xx   x  xx    xxxx           x",
-			"xx   x       xxx    x  xxxx xx",
-			"xx   xxxxx  xxxx  xxx  xxx   x",
-			"xx      xx          x  xxx   x",
-			"xx      xx      s        x   x",
-			"xx  xxxxxxxxxxx  xxxxxxxxx   x",
-			"xx  xxx                      x",
-			"xx       xx      xxxx        x",
-			"xx  xxxxxxxxxxxxxxxxxxxxx xxxx",
-			"xx  xxx         x            x",
-			"xx  xxx  xxxx   x  x  xxx    x",
-			"xx  xxx  x  x   x  x  x      x",
-			"xx  xxx  x  xx  xx xxxx x    x",
-			"xx       x              x    x",
-			"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"};
 
     public void draw(Canvas canvas)
     {
@@ -135,15 +110,12 @@ public class Dungeon
 		
         for (int y=(int)scrollVector.getY();y<maxy; y++)
         	for (int x=(int)scrollVector.getX(); x<maxx; x++)
-        		if (!quads[y][x].isWalkable())
-	        	{
-	        		int ix = x*XDIM - (int)(scrollVector.getX()*XDIM);
-	        		int iy = y*YDIM - (int)(scrollVector.getY()*YDIM);
-
-			        canvas.drawBitmap(bmp, srcRect, new Rect(ix, iy, ix + XDIM, iy + YDIM), null);
-	        	}
+        		quads[y][x].draw(canvas, scrollVector);
         
         chibi.draw(canvas, scrollVector);
+        
+        for (UIButton b : uiButtons)
+        	b.draw(canvas, scrollVector);
     }
     
     public DungeonQuad getQuad(Vec2 pos)
@@ -223,9 +195,29 @@ public class Dungeon
 		}
 	}
 
-
+	
+	public boolean affectedByTouch(Sprite s, int x, int y)
+	{
+		Vec2 pos = s.getPosition();
+		Vec2 maxps = Vec2.sum(pos, new Vec2(s.width, s.height));
+		
+		return (x <= maxps.getX() && x >= pos.getX() && y <= maxps.getY() && y >= pos.getY());
+	}
+	
 	public void onTouchEvent(float x, float y)
 	{
-		chibi.RequestGo((int) (x/XDIM) + (int)scrollVector.getX(), (int) (y/YDIM) + (int)scrollVector.getY());
+		boolean done = false;
+		
+		for (UIButton b : uiButtons)
+			if (affectedByTouch(b, (int)x, (int) y)) {// in screen coordinates
+				b.onTouchEvent((int)x, (int) y); 		
+				done = true;
+			}
+		
+		if (!done) {
+			final int screenX = (int) (x/DungeonQuad.XDIM) + (int)scrollVector.getX();
+			final int screenY = (int) (y/DungeonQuad.YDIM) + (int)scrollVector.getY();
+			chibi.RequestGo(screenX, screenY); // in game coordinate
+		}
 	}
 }

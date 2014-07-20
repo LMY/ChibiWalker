@@ -3,6 +3,7 @@ package com.y;
 import com.y.chibiwalker.R;
 import com.y.dungeon.Dungeon;
 import com.y.dungeon.Sprite;
+import com.y.ui.UIButton;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -77,6 +78,8 @@ public class GameView extends SurfaceView
 		
 		int width = getWidth();
 		int height = getHeight();
+		
+		UIButton.initButtons(this,  chibi, bmps[1], bmps[2], bmps[3], bmps[4], bmps[5]);
 		dungeon = new Dungeon(chibi, dungeonwall, width, height);
 	}
 	

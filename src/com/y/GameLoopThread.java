@@ -31,7 +31,11 @@ public class GameLoopThread extends Thread
 					if (c != null)
 						view.onDraw(c);
 				}
-			} finally {
+			}
+			catch (Exception e) { 
+				int x = 0;
+			}
+			finally {
 				if (c != null) {
 					view.getHolder().unlockCanvasAndPost(c);
 				}
