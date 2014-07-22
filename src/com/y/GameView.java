@@ -2,7 +2,7 @@ package com.y;
 
 import com.y.chibiwalker.R;
 import com.y.dungeon.Dungeon;
-import com.y.dungeon.Sprite;
+import com.y.dungeon.Character;
 import com.y.ui.UIButton;
 
 import android.annotation.SuppressLint;
@@ -65,7 +65,7 @@ public class GameView extends SurfaceView
 	private void createSprites() 
 	{
 		int[] res_indexes = { R.drawable.chiarina, R.drawable.bad1,  R.drawable.bad2, R.drawable.bad3, R.drawable.bad4, R.drawable.bad5, R.drawable.bad6, 
-							R.drawable.good1,R.drawable.good2, R.drawable.good3, R.drawable.good4, R.drawable.good5, R.drawable.good6 };
+							R.drawable.good1, R.drawable.good2, R.drawable.good3, R.drawable.good4, R.drawable.good5, R.drawable.good6 };
 
 		Resources resources = getResources();
 		Bitmap[] bmps = new Bitmap[res_indexes.length];
@@ -73,7 +73,7 @@ public class GameView extends SurfaceView
 			bmps[i] = BitmapFactory.decodeResource(resources, res_indexes[i]);
 		
 		// create sprites
-		Sprite chibi = new Sprite(this, bmps[0], Sprite.Action.IDLE);
+		Character chibi = new Character(this, bmps[0], Character.Action.IDLE);
 		Bitmap dungeonwall = BitmapFactory.decodeResource(resources, R.drawable.wall);
 		
 		int width = getWidth();
@@ -96,7 +96,7 @@ public class GameView extends SurfaceView
     @Override
     public boolean onTouchEvent(MotionEvent event)
     {
-          if (lastClick < 0 || System.currentTimeMillis() - lastClick > 200) {
+          if (lastClick < 0 || System.currentTimeMillis() - lastClick > 5) {
                  lastClick = System.currentTimeMillis();
                  synchronized (getHolder()) {
                		 dungeon.onTouchEvent(event.getX(), event.getY());

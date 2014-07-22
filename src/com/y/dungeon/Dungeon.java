@@ -1,18 +1,21 @@
 package com.y.dungeon;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import com.y.Randomizer;
 import com.y.ui.UIButton;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Rect;
+import android.graphics.Color;
 
 public class Dungeon
 {
-	private Sprite chibi;
+	private Character chibi;
+	private List<Bullet> bullets;
 	
     private Vec2 scrollVector;
     
@@ -20,9 +23,11 @@ public class Dungeon
     
     private Vec2 screensize;
     
-	public Dungeon(Sprite chibi, Bitmap bmpWall, int screenwidth, int screenheight)
+	public Dungeon(Character chibi, Bitmap bmpWall, int screenwidth, int screenheight)
 	{
 		this.chibi = chibi;
+		
+		bullets = new ArrayList<Bullet>();
 		
 		screensize = new Vec2(screenwidth/DungeonQuad.XDIM, screenheight/DungeonQuad.YDIM);
 		
@@ -83,14 +88,16 @@ public class Dungeon
 
         	for (int x=0; x<dx; x++) {
         		final Vec2 position = new Vec2(x, y);
-        		
+       			quads[y][x] = new DungeonQuad(bmpWall, walkable[y][x], position);
+       			final DungeonQuad q = quads[y][x];
+       			quads[y][x].getOnPlayerEnter().add(new TriggerableEvent() { public void call(Character s) { q.setColor(Color.GREEN); } });
+       			quads[y][x].getOnPlayerStay().add(new TriggerableEvent() { public void call(Character s) { q.setColor(Color.RED); } });
+       			quads[y][x].getOnPlayerExit().add(new TriggerableEvent() { public void call(Character s) { q.setColor(Color.BLACK); } });
+       			
         		if (x == 2 && y == 2) {
-        			chibi.setPosition(new Vec2(x, y));
-        			quads[y][x] = new DungeonQuad(bmpWall, true, position);
+        			chibi.setPosition(position);
 //        			quads[y][x].onPlayerEnter(chibi);
         		}
-        		else
-        			quads[y][x] = new DungeonQuad(bmpWall, walkable[y][x], position);
         	}
         }
 	}
@@ -114,6 +121,9 @@ public class Dungeon
         
         chibi.draw(canvas, scrollVector);
         
+        for (Bullet b : bullets)
+        	b.draw(canvas, scrollVector);
+        
         for (UIButton b : uiButtons)
         	b.draw(canvas, scrollVector);
     }
@@ -129,38 +139,69 @@ public class Dungeon
     		return quads[py][px];
     }
     
-    public boolean move(Sprite sprite, Vec2 newposition)
+    public boolean move(Character sprite, Vec2 newposition)
     {
-    	final DungeonQuad[] deltas = new DungeonQuad[]{ getQuad(newposition),
-    										getQuad(Vec2.sum(newposition, new Vec2(0.99, 0))),
-    										getQuad(Vec2.sum(newposition, new Vec2(0, 0.99))),
-    										getQuad(Vec2.sum(newposition, new Vec2(0.99, 0.99))),
-    	};
+    	// quadrati destinazione
+    	Set<DungeonQuad> toQuads = new HashSet<DungeonQuad>();
+    	toQuads.add(getQuad(newposition));
+    	toQuads.add(getQuad(Vec2.sum(newposition, new Vec2(0.99, 0))));
+    	toQuads.add(getQuad(Vec2.sum(newposition, new Vec2(0, 0.99))));
+    	toQuads.add(getQuad(Vec2.sum(newposition, new Vec2(0.99, 0.99))));
     	
-    	for (DungeonQuad q : deltas)
+    	// se non è movimento in un quadrato vuoto, abort
+    	for (DungeonQuad q : toQuads)
     		if (q == null || !q.isWalkable())
         		return false;
     	
-    	DungeonQuad fromQuad = getQuad(sprite.getPosition());
-//    	if (fromQuad != toQuad) {
-//	    	if (fromQuad != null)
-//	    		fromQuad.onPlayerExit(sprite);
-//	   		toQuad.onPlayerEnter(sprite);
-//	   		sprite.setPosition(newposition);
-//			return true;
-//    	}
-//    	else {
-    		if (Vec2.subtract(sprite.getPosition(), newposition).length() > 0) {
-    			sprite.setPosition(newposition);
-    			return true;
-    		}
-    		else    		
-    			return false;
-//    	}
+    	// quadrati attualmente occupati
+    	final Vec2 spritePos = sprite.getPosition();
+    	Set<DungeonQuad> nowQuads = new HashSet<DungeonQuad>();
+    	nowQuads.add(getQuad(spritePos));
+    	nowQuads.add(getQuad(Vec2.sum(spritePos, new Vec2(0.99, 0))));
+    	nowQuads.add(getQuad(Vec2.sum(spritePos, new Vec2(0, 0.99))));
+    	nowQuads.add(getQuad(Vec2.sum(spritePos, new Vec2(0.99, 0.99))));
+    	for (DungeonQuad dnow : nowQuads)
+    		nowQuads.add(dnow);
+    	
+    	// eventi: enter, stay, exit
+    	for (DungeonQuad q : nowQuads)
+    		if (toQuads.contains(q))
+    			q.onPlayerStay(sprite);
+    		else
+    			q.onPlayerExit(sprite);
+    	
+    	for (DungeonQuad q : toQuads)
+    		if (!nowQuads.contains(q))
+    			q.onPlayerEnter(sprite);
+    	
+		if (Vec2.subtract(sprite.getPosition(), newposition).length() > 0) {
+			sprite.setPosition(newposition);
+			return true;
+		}
+		else
+			return false;
     }
     
 	private void update() 
 	{
+    	Vec2 chibipos = chibi.getPosition();
+    	Vec2 maxchibipos = Vec2.sum(chibi.getPosition(), new Vec2(1, 1));
+
+    	for (Bullet b : bullets) {
+        	b.update();
+        
+        	if (Vec2.isInside(chibipos, maxchibipos, b.getPosition())) {
+        		b.onHit(chibi);
+        		bullets.remove(b);
+        	}
+        	else {
+        		DungeonQuad q = getQuad(b.getPosition());
+        		if (!q.isWalkable())
+        			bullets.remove(b);
+        	}
+        		
+		}
+		
 		chibi.update(this);
 		setScroll();
 	}

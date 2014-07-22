@@ -109,4 +109,11 @@ public class Vec2
 	public void setY(double y) {
 		this.y = y;
 	}
+	
+	
+	public static boolean isInside(Vec2 tl, Vec2 br, Vec2 point)
+	{
+		return point.getX() >= tl.getX() && point.getY() >= tl.getY() &&
+				point.getX() <= br.getX() && point.getY() <= br.getY();
+	}
 }

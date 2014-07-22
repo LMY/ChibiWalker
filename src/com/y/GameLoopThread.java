@@ -33,6 +33,7 @@ public class GameLoopThread extends Thread
 				}
 			}
 			catch (Exception e) { 
+				@SuppressWarnings("unused")
 				int x = 0;
 			}
 			finally {

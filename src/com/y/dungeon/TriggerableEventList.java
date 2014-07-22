@@ -18,7 +18,7 @@ public class TriggerableEventList extends TriggerableEvent
 	public void clear() { events.clear(); }
 
 	@Override
-	public void call(Sprite s) {
+	public void call(Character s) {
 		for (TriggerableEvent te : events)
 			te.call(s);
 	}
