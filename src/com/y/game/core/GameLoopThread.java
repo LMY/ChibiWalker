@@ -1,4 +1,4 @@
-package com.y;
+package com.y.game.core;
 import android.annotation.SuppressLint;
 import android.graphics.Canvas;
 
@@ -21,7 +21,7 @@ public class GameLoopThread extends Thread
 	@Override
 	public void run() {
 		long ticksPS = 1000 / FPS;
-		long startTime = 0;	// TODO: a 0 non va benissimo
+		long startTime = 0;	// TODO--: a 0 non va benissimo
 		long sleepTime;
 		while (running) {
 			Canvas c = null;

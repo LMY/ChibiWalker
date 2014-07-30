@@ -1,12 +1,10 @@
-package com.y;
+package com.y.game.utils;
 
 import java.util.Random;
 
 public class Randomizer
 {
-	public static Randomizer instance;
-	
-	public static void init() { instance = new Randomizer(); }
+	public static Randomizer DEFAULT = new Randomizer();
 	
 	
 	private Random rand;

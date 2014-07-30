@@ -1,7 +1,11 @@
-package com.y.dungeon;
+package com.y.game.core;
 
 public class Vec2
 {
+	public static Vec2 ZERO = new Vec2();
+	public static Vec2 X_UNIT = new Vec2(1, 0);
+	public static Vec2 Y_UNIT = new Vec2(0, 1);
+	
 	private double x;
 	private double y;
 	
@@ -43,6 +47,12 @@ public class Vec2
 	{
 		x *= k;
 		y *= k;
+	}
+	
+	public void dot(Vec2 v)
+	{
+		x *= v.x;
+		y *= v.y;
 	}
 	
 	public Vec2 towards(Vec2 dest, double len)
@@ -88,6 +98,13 @@ public class Vec2
 		return r;
 	}
 	
+	public static Vec2 dot(Vec2 v1, Vec2 v2)
+	{
+		Vec2 r = new Vec2(v1);
+		r.dot(v2);
+		return r;
+	}
+	
 	public static Vec2 towards(Vec2 v1, Vec2 v2, double dist)
 	{
 		return v1.towards(v2, dist);
@@ -109,7 +126,6 @@ public class Vec2
 	public void setY(double y) {
 		this.y = y;
 	}
-	
 	
 	public static boolean isInside(Vec2 tl, Vec2 br, Vec2 point)
 	{

@@ -1,7 +1,9 @@
-package com.y.dungeon;
+package com.y.game.events;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import com.y.game.entities.GameObject;
 
 public class TriggerableEventList extends TriggerableEvent
 {
@@ -18,8 +20,8 @@ public class TriggerableEventList extends TriggerableEvent
 	public void clear() { events.clear(); }
 
 	@Override
-	public void call(Character s) {
+	public void call(GameObject target) {
 		for (TriggerableEvent te : events)
-			te.call(s);
+			te.call(target);
 	}
 }

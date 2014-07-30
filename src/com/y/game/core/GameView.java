@@ -1,15 +1,11 @@
-package com.y;
+package com.y.game.core;
 
-import com.y.chibiwalker.R;
-import com.y.dungeon.Dungeon;
-import com.y.dungeon.Character;
-import com.y.ui.UIButton;
+import com.y.game.scene.Scene;
+import com.y.game.scene.SceneFactory;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.Resources;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.view.MotionEvent;
@@ -23,7 +19,7 @@ public class GameView extends SurfaceView
 	private GameLoopThread gameLoopThread;
 
 	@SuppressLint("NewApi")
-	public GameView(Context context)
+	public GameView(Context context, final SceneFactory scenecreator)
 	{
 		super(context);
 		gameLoopThread = new GameLoopThread(this);
@@ -48,7 +44,11 @@ public class GameView extends SurfaceView
 			@Override
 			public void surfaceCreated(SurfaceHolder holder)
 			{
-				createSprites();
+				int width = getWidth();
+				int height = getHeight();
+				Resources resources = getResources();
+				
+				scene = scenecreator.createScene(resources, new Vec2(width, height));
                 gameLoopThread.setRunning(true);
                 gameLoopThread.start();
 			}
@@ -60,46 +60,28 @@ public class GameView extends SurfaceView
 		});
 	}
 	
-	private Dungeon dungeon;
+	private Scene scene;
 
-	private void createSprites() 
-	{
-		int[] res_indexes = { R.drawable.chiarina, R.drawable.bad1,  R.drawable.bad2, R.drawable.bad3, R.drawable.bad4, R.drawable.bad5, R.drawable.bad6, 
-							R.drawable.good1, R.drawable.good2, R.drawable.good3, R.drawable.good4, R.drawable.good5, R.drawable.good6 };
-
-		Resources resources = getResources();
-		Bitmap[] bmps = new Bitmap[res_indexes.length];
-		for (int i=0; i<bmps.length; i++)
-			bmps[i] = BitmapFactory.decodeResource(resources, res_indexes[i]);
-		
-		// create sprites
-		Character chibi = new Character(this, bmps[0], Character.Action.IDLE);
-		Bitmap dungeonwall = BitmapFactory.decodeResource(resources, R.drawable.wall);
-		
-		int width = getWidth();
-		int height = getHeight();
-		
-		UIButton.initButtons(this,  chibi, bmps[1], bmps[2], bmps[3], bmps[4], bmps[5]);
-		dungeon = new Dungeon(chibi, dungeonwall, width, height);
-	}
-	
-	
 	@Override
 	protected void onDraw(Canvas canvas)
 	{
 		canvas.drawColor(Color.BLACK);
-		dungeon.draw(canvas);
+
+		scene = scene.nextScene();
+		scene.update();
+		scene.draw(canvas);
 	}
 
 	private long lastClick = -1;
 	
-    @Override
+    @SuppressLint("ClickableViewAccessibility") // porcaputtana non so come risolvere questo
+	@Override
     public boolean onTouchEvent(MotionEvent event)
     {
           if (lastClick < 0 || System.currentTimeMillis() - lastClick > 5) {
                  lastClick = System.currentTimeMillis();
                  synchronized (getHolder()) {
-               		 dungeon.onTouchEvent(event.getX(), event.getY());
+                	 scene.onTouchEvent(event.getX(), event.getY());
                  }
           }
 
@@ -112,5 +94,6 @@ public class GameView extends SurfaceView
     	super.performClick();
         return true;
     }
+    
 }
 
