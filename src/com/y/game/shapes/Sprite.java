@@ -4,7 +4,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Rect;
 
-import com.y.game.core.Vec2;
+import com.y.game.core.Vec2d;
 import com.y.game.scene.Camera;
 
 public class Sprite extends Shape
@@ -13,7 +13,7 @@ public class Sprite extends Shape
     private int action = 0;
     private Bitmap image;
     
-	public Sprite(Bitmap image, Vec2 size)
+	public Sprite(Bitmap image, Vec2d size)
 	{
 		super(size);
 		frame = 0;
@@ -22,7 +22,7 @@ public class Sprite extends Shape
 	}
 	
 	@Override
-	public void draw(Vec2 src, Canvas canvas, Camera camera)
+	public void draw(Vec2d src, Canvas canvas, Camera camera)
 	{
 		final int ix = (int) (src.getX()-camera.getScroll().getX());
 		final int iy = (int) (src.getY()-camera.getScroll().getY());
@@ -43,7 +43,7 @@ public class Sprite extends Shape
 	public void update()
 	{
 		//TODO: Sprite::update() framenumber
-		frame = ++frame % 4; // % sprites[action].length;
+		frame = ++frame % 3; // % sprites[action].length;
 	}
 
 	public int getFrame() {

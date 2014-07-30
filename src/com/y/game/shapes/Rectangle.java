@@ -2,14 +2,14 @@ package com.y.game.shapes;
 
 import android.graphics.Canvas;
 
-import com.y.game.core.Vec2;
+import com.y.game.core.Vec2d;
 import com.y.game.scene.Camera;
 
 public class Rectangle extends Shape
 {
 	android.graphics.Paint myPaint = new android.graphics.Paint();
 	
-	public Rectangle(int color, Vec2 size)
+	public Rectangle(int color, Vec2d size)
 	{
 		super(size);
 		setColor(color);
@@ -24,7 +24,7 @@ public class Rectangle extends Shape
 	public int getColor() { return myPaint.getColor(); }
 	
 	@Override
-	public void draw(Vec2 src, Canvas canvas, Camera camera)
+	public void draw(Vec2d src, Canvas canvas, Camera camera)
 	{
 		final int ix = (int) (src.getX()-camera.getScroll().getX());
 		final int iy = (int) (src.getY()-camera.getScroll().getY());

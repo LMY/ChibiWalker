@@ -2,7 +2,7 @@ package com.y.game.entities;
 
 import android.graphics.Canvas;
 
-import com.y.game.core.Vec2;
+import com.y.game.core.Vec2d;
 import com.y.game.events.TriggerableEventList;
 import com.y.game.events.TriggerableEventListProxy;
 import com.y.game.scene.Camera;
@@ -11,7 +11,7 @@ import com.y.game.shapes.Shape;
 
 public class Tile extends GameObject
 {
-	public Tile(Vec2 position, Shape shape, Scene scene, boolean walkable)
+	public Tile(Vec2d position, Shape shape, Scene scene, boolean walkable)
 	{
 		super(position, shape, scene);
 
@@ -59,14 +59,13 @@ public class Tile extends GameObject
 	
 	public void draw(Canvas canvas, Camera camera)
 	{
-		shape.draw(Vec2.dot(position, shape.getSize()), canvas, camera);
+		shape.draw(Vec2d.dot(position, shape.getSize()), canvas, camera);
 	}
 	
 	@Override
-	public void update()
+	public void update(Scene scene)
 	{
-		//TODO: Tile::update()
-		//shape.update();
+		shape.update();
 	}
 	
 	public boolean isWalkable() {

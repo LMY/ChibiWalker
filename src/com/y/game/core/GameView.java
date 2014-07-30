@@ -48,7 +48,7 @@ public class GameView extends SurfaceView
 				int height = getHeight();
 				Resources resources = getResources();
 				
-				scene = scenecreator.createScene(resources, new Vec2(width, height));
+				scene = scenecreator.createScene(resources, new Vec2d(width, height));
                 gameLoopThread.setRunning(true);
                 gameLoopThread.start();
 			}

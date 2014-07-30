@@ -1,7 +1,7 @@
 package com.y.game.entities.ui;
 
 
-import com.y.game.core.Vec2;
+import com.y.game.core.Vec2d;
 import com.y.game.entities.GameObject;
 import com.y.game.scene.Scene;
 import com.y.game.shapes.Shape;
@@ -11,7 +11,7 @@ public abstract class UIElement extends GameObject
 	private boolean visible;
 	private boolean enabled;
 	
-	public UIElement(Vec2 position, Shape shape, Scene scene)
+	public UIElement(Vec2d position, Shape shape, Scene scene)
 	{
 		super(position, shape, scene);
 		

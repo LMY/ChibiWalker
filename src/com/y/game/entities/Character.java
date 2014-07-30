@@ -3,7 +3,7 @@ package com.y.game.entities;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.y.game.core.Vec2;
+import com.y.game.core.Vec2d;
 import com.y.game.scene.Scene;
 import com.y.game.shapes.Shape;
 
@@ -12,7 +12,7 @@ public abstract class Character extends GameObject
 	private List<Item> equippedItems;
 	private List<Item> inventoryItems;
 	
-	public Character(Vec2 position, Shape shape, Scene scene)
+	public Character(Vec2d position, Shape shape, Scene scene)
 	{
 		super(position, shape, scene);
 		

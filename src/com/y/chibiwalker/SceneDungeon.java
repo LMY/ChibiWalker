@@ -11,7 +11,8 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 
 import com.y.chibiwalker.R;
-import com.y.game.core.Vec2;
+import com.y.game.core.Vec2d;
+import com.y.game.core.Vec2i;
 import com.y.game.entities.Particle;
 import com.y.game.entities.Tile;
 import com.y.game.entities.Character;
@@ -22,14 +23,14 @@ import com.y.game.shapes.Sprite;
 
 public class SceneDungeon extends Scene
 {
-	public final static Vec2 QUADSIZE = new Vec2(64, 64);
+	public final static Vec2d QUADSIZE = new Vec2d(64, 64);
 	
 	private List<Particle> particles;
 	private List<Character> players;
 	private List<Character> enemies;
 	private Tile[][] tiles;
 	
-	public SceneDungeon(Resources resources, Vec2 viewport)
+	public SceneDungeon(Resources resources, Vec2d viewport)
 	{
 		super();
 		particles = new ArrayList<Particle>();
@@ -44,9 +45,6 @@ public class SceneDungeon extends Scene
 
 	private void initialize(Resources resources)
 	{
-//		int[] res_indexes = { R.drawable.chiarina, R.drawable.bad1,  R.drawable.bad2, R.drawable.bad3, R.drawable.bad4, R.drawable.bad5, R.drawable.bad6, 
-//				R.drawable.good1, R.drawable.good2, R.drawable.good3, R.drawable.good4, R.drawable.good5, R.drawable.good6 };
-
 		int SIZEN = 100;
 		tiles = new Tile[SIZEN][SIZEN];
 		
@@ -55,17 +53,15 @@ public class SceneDungeon extends Scene
 		for (int y=0; y<tiles.length; y++)
 			for (int x=0; x<tiles[y].length; x++)
 			{
-				boolean walkable = !(x==0||y==0||x==tiles[y].length||y==tiles.length);
-				//walkable &= Randomizer.DEFAULT.randDouble() > 0.4;
-				
+				boolean walkable = !(x<=0||y<=0||x>=tiles[y].length-1||y>=tiles.length-1);
 				if (x > 4 && x < 10 && y > 3 && y < 10)
 					walkable = false;
 				
-				tiles[y][x] = new Tile(new Vec2(x, y), walkable ? rectBlack : spriteWall, this, walkable);
+				tiles[y][x] = new Tile(new Vec2d(x, y), walkable ? rectBlack : spriteWall, this, walkable);
 			}
 		
 		final Sprite spriteChibi = new Sprite(BitmapFactory.decodeResource(resources, R.drawable.chiarina), SceneDungeon.QUADSIZE);
-		Chibi chibi = new Chibi(new Vec2(2,2), spriteChibi, this);
+		Chibi chibi = new Chibi(new Vec2d(2,2), spriteChibi, this);
 
 		players.add(chibi);
 	}
@@ -77,36 +73,7 @@ public class SceneDungeon extends Scene
 	public List<Particle> getParticlesOnScreen() { return particles; }
 	
 
-	@Override
-	public void draw(Canvas canvas)
-	{
-		final Camera camera = getCamera();
-		
-		if (tiles != null) {
-			final Vec2 scrollVector = camera.getScroll();
-			final Vec2 screensize = camera.getViewport();
-	        int maxx = 1+(int) Math.ceil(scrollVector.getX() + screensize.getX()); 
-	        int maxy = 1+(int) Math.ceil(scrollVector.getY() + screensize.getY());
-	        
-	        if (maxy >= tiles.length)
-	        	maxy = tiles.length;
-	        if (maxx >= tiles[0].length)
-	        	maxx = tiles[0].length;
-			
-	        for (int y=(int)scrollVector.getY();y<maxy; y++)
-	        	for (int x=(int)scrollVector.getX(); x<maxx; x++)
-	        		tiles[y][x].draw(canvas, camera);
-		}
-		
-		for (Character c : enemies)
-			c.draw(canvas, camera);
-		for (Character c : players)
-			c.draw(canvas, camera);
-		for (Particle p : particles)
-			p.draw(canvas, camera);			
-	}
-
-    private Tile getTile(Vec2 pos)
+    private Tile getTile(Vec2d pos)
     {
 //    	int px = (int)pos.getX();
 //    	int py = (int)pos.getY();
@@ -120,13 +87,13 @@ public class SceneDungeon extends Scene
     	catch (Exception e) { return null; }
     }
     
-    private Set<Tile> getTiles(Vec2 pos)
+    private Set<Tile> getTiles(Vec2d pos)
     {
     	Set<Tile> Quads = new HashSet<Tile>();
     	Quads.add(getTile(pos));
-    	Quads.add(getTile(Vec2.sum(pos, new Vec2(0.99, 0))));
-    	Quads.add(getTile(Vec2.sum(pos, new Vec2(0, 0.99))));
-    	Quads.add(getTile(Vec2.sum(pos, new Vec2(0.99, 0.99))));
+    	Quads.add(getTile(Vec2d.sum(pos, new Vec2d(0.99, 0))));
+    	Quads.add(getTile(Vec2d.sum(pos, new Vec2d(0, 0.99))));
+    	Quads.add(getTile(Vec2d.sum(pos, new Vec2d(0.99, 0.99))));
     	return Quads;
     }
     
@@ -134,12 +101,12 @@ public class SceneDungeon extends Scene
     public boolean isPlayer(Character sprite) { return players.contains(sprite); }
     public boolean isEnemy(Character sprite) { return enemies.contains(sprite); }
     
-    public boolean move(Character sprite, Vec2 newposition)
+    public boolean move(Character sprite, Vec2d newposition)
     {
     	return isPlayer(sprite) ? movePlayer(sprite, newposition) : moveEnemy(sprite, newposition);
     }
     		
-    public boolean movePlayer(Character sprite, Vec2 newposition)
+    public boolean movePlayer(Character sprite, Vec2d newposition)
     {
     	// quadrati destinazione: se non è movimento in un quadrato vuoto, abort
     	final Set<Tile> toQuads = getTiles(newposition);
@@ -148,7 +115,7 @@ public class SceneDungeon extends Scene
         		return false;
     	
     	// quadrati attualmente occupati
-    	final Vec2 spritePos = sprite.getPosition();
+    	final Vec2d spritePos = sprite.getPosition();
     	
     	// eventi: enter, stay, exit
     	final Set<Tile> nowQuads = getTiles(spritePos);
@@ -170,7 +137,7 @@ public class SceneDungeon extends Scene
 			return false;
     }
     
-    public boolean moveEnemy(Character sprite, Vec2 newposition)
+    public boolean moveEnemy(Character sprite, Vec2d newposition)
     {
     	// quadrati destinazione: se non è movimento in un quadrato vuoto, abort
     	final Set<Tile> toQuads = getTiles(newposition);
@@ -179,7 +146,7 @@ public class SceneDungeon extends Scene
         		return false;
     	
     	// quadrati attualmente occupati
-    	final Vec2 spritePos = sprite.getPosition();
+    	final Vec2d spritePos = sprite.getPosition();
     	
     	// eventi: enter, stay, exit
     	final Set<Tile> nowQuads = getTiles(spritePos);
@@ -205,19 +172,19 @@ public class SceneDungeon extends Scene
 	public void update()
 	{
 		for (Character c : players)
-			c.update();
+			c.update(this);
 		
 		for (Particle p : particles) {
-			p.update();
+			p.update(this);
 			if (p.isExpired())
 				particles.remove(p);
 			
 			final List<Character> playersOnScreen = getPlayersOnScreen();
 			for (Character player : playersOnScreen) {
-		    	Vec2 chibipos = player.getPosition();
-		    	Vec2 maxchibipos = Vec2.sum(player.getPosition(), new Vec2(1, 1));
+		    	Vec2d chibipos = player.getPosition();
+		    	Vec2d maxchibipos = Vec2d.sum(player.getPosition(), new Vec2d(1, 1));
 		    	
-	        	if (Vec2.isInside(chibipos, maxchibipos, p.getPosition())) {
+	        	if (Vec2d.isInside(chibipos, maxchibipos, p.getPosition())) {
 	        		p.hit(player);
 	        		particles.remove(p);
 	        	}
@@ -228,22 +195,87 @@ public class SceneDungeon extends Scene
 	        	}
 			}
 		}
+		
 		for (Character c : enemies)
-			c.update();
+			c.update(this);
 
-		if (tiles != null)
+		if (tiles != null) {
+			// update on screen
+//			final Vec2i mint = getMinTileIndexes();
+//			final Vec2i maxt = getMaxTileIndexes();
+//			final int maxx = maxt.getX(); 
+//			final int maxy = maxt.getY();
+//	        
+//	        for (int y=mint.getY();y<maxy; y++)
+//	        	for (int x=mint.getX(); x<maxx; x++)
+//					tiles[y][x].update(this);
+	        
+			// update all
 			for (int y=0; y<tiles.length; y++)
 				for (int x=0; x<tiles[y].length; x++)
-					tiles[y][x].update();
+					tiles[y][x].update(this);
+		}
 
 		getCamera().update();	// does nothing
 	}
 
+	private Vec2i getMinTileIndexes()
+	{
+		return getCamera().getScroll().toVec2i();
+	}
+	
+	private Vec2i getMaxTileIndexes()
+	{
+		final Camera camera = getCamera();
+		final Vec2d scrollVector = camera.getScroll();
+		final Vec2d screensize = camera.getViewport();
+        int maxx = 1+(int) Math.ceil(scrollVector.getX() + screensize.getX()/QUADSIZE.getX()); 
+        int maxy = 1+(int) Math.ceil(scrollVector.getY() + screensize.getY()/QUADSIZE.getY());
+        
+        if (maxy >= tiles.length)
+        	maxy = tiles.length;
+        if (maxx >= tiles[0].length)
+        	maxx = tiles[0].length;
+        
+        return new Vec2i(maxx, maxy);
+	}
+	
+	
+
+	@Override
+	public void draw(Canvas canvas)
+	{
+		final Camera camera = getCamera();
+		
+		if (tiles != null) {
+			final Vec2i mint = getMinTileIndexes();
+			final Vec2i maxt = getMaxTileIndexes();
+			final int maxx = maxt.getX(); 
+			final int maxy = maxt.getY();
+	        
+	        for (int y=mint.getY();y<maxy; y++)
+	        	for (int x=mint.getX(); x<maxx; x++)
+	        		tiles[y][x].draw(canvas, camera);
+		}
+		
+		for (Character c : enemies)
+			c.draw(canvas, camera);
+		for (Character c : players)
+			c.draw(canvas, camera);
+		for (Particle p : particles)
+			p.draw(canvas, camera);			
+	}
+	
 	@Override
 	public void onTouchEvent(float x, float y)
 	{
+		final Camera camera = getCamera();
+		final Vec2d scroll = camera.getScroll();
+		final int ix = (int) ((x - scroll.getX())/SceneDungeon.QUADSIZE.getX());
+		final int iy = (int) ((y - scroll.getY())/SceneDungeon.QUADSIZE.getY());
+		
 		Chibi chibi = (Chibi) this.players.get(0);
-		chibi.RequestGo((int) x, (int) y);
+		chibi.RequestGo(ix, iy);
 	}
 	    
 	@Override
